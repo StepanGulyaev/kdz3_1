@@ -13,27 +13,26 @@ class task1:
         print(f'( {variable1} - 1 )( {CD}{variable2} - ({alphabeta}) ) >= 0')
         print(f'{variable1}( {CD}{variable2} - ({alphabeta}) ) >= 0')
 
-    def __get_pq_sections(self, CD : int, alphabeta : int, variable1 : str, variable2 : str):
-        pq = []
-        variable = round(alphabeta / CD, 3)
-
-        for i in range(2):
-            if CD >= 0:
-                if (i - 1) * ((variable + 0.001) * CD - alphabeta) >= 0: symbol = ">="
-                else: symbol = "<="
-            else:
-                if (i - 1) * ((variable - 0.001) * CD - alphabeta) >= 0: symbol = "<="
-                else: symbol = ">="
-            dict = {f'{variable1} = {i}' : [variable2, symbol, variable]}
-            pq.append(dict)
-        dict = {f'0 < {variable1} < 1' : [ variable2,"=", variable]}
-        pq.append(dict)
+    def __get_pq_sections(self, CD: int, alphabeta: int, variable1: str, variable2: str):
+        pq = [[variable1, variable2]]
+        pq_value = round(alphabeta / CD, 3)
+        if CD >= 0:
+            segments = {0: [0, pq_value], 1: [pq_value, 1]}
+        else:
+            segments = {0: [pq_value, 1], 1: [0, pq_value]}
+        pq.append(segments)
         return pq
 
-    def __print_pq_sections(self,pq_sections : list):
-        for i in range(len(pq_sections)):
-            print(f'{" ".join(map(str,list(pq_sections[i].keys())))}, {" ".join(map(str,list(pq_sections[i].values())[0]))}')
 
+    def __print_pq_sections(self,pq_sections : list):
+        keys = list(pq_sections[1].keys())
+        values = list(pq_sections[1].values())
+        pq_value = list(set(values[0]).intersection(values[1]))[0]
+        for i in range(2):
+            print(f'{pq_sections[0][0]} = {keys[i]}, '
+                  f'{pq_sections[0][1]} ∈ {values[i]}')
+        print(f'{pq_sections[0][0]} ∈ (0,1), '
+              f'{pq_sections[0][1]} = {pq_value}')
 
     def getNashPoint(self, A : list, B : list):
         C = self.__get_nash_coef_CD(A)
@@ -44,14 +43,14 @@ class task1:
 
         print()
         print("Для матрицы А:")
-        self.__print_formula(C,alpha,"p","q")
+        self.__print_formula(C, alpha, "p", "q")
         print()
         print("Для матрицы B:")
-        self.__print_formula(D,beta, "q", "p")
+        self.__print_formula(D, beta, "q", "p")
         print()
 
-        q_sectinos = self.__get_pq_sections(C,alpha,"p","q")
-        p_sections = self.__get_pq_sections(D,beta, "q","p")
+        q_sectinos = self.__get_pq_sections(C, alpha, "p", "q")
+        p_sections = self.__get_pq_sections(D, beta, "q", "p")
 
         print("Промежутки для p: ")
         self.__print_pq_sections(q_sectinos)
@@ -59,6 +58,10 @@ class task1:
         print("Промежутки для q: ")
         self.__print_pq_sections(p_sections)
         print()
+
+
+
+
 
 
 
