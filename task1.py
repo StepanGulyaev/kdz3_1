@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from graphics import *
+
 class Task1:
 
     def __init__(self):

@@ -1,6 +1,7 @@
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
+from point import *
 
 matplotlib.use('TkAgg')
 
@@ -11,10 +12,10 @@ class Graphics:
         self.__dotsize = dotsize
         self.__fontsize = fontsize
         self.__annotate_shift = annotate_shift
-    def __draw_grid(self, graph : plt.gca, x_range : tuple , y_range : tuple,
+    def __draw_grid(self, graph : plt.gca, major_ticks : tuple , minor_ticks : tuple,
                     x_axis_name : str, y_axis_name : str):
-        major_ticks = np.arange(*x_range)
-        minor_ticks = np.arange(*y_range)
+        major_ticks = np.arange(*major_ticks)
+        minor_ticks = np.arange(*minor_ticks)
         graph.set_xticks(major_ticks)
         graph.set_xticks(minor_ticks, minor=True)
         graph.set_yticks(major_ticks)
@@ -25,7 +26,7 @@ class Graphics:
         plt.xlabel(f'{x_axis_name}')
         plt.ylabel(f'{y_axis_name}')
 
-    def __draw_axis(self, graph: plt.gca(), x_range : tuple, y_range : tuple):
+    def __draw_axis(self, graph, x_range : tuple, y_range : tuple):
         graph.set_xlim(*x_range)
         graph.set_ylim(*y_range)
         plt.axhline(0, color='black')
@@ -40,6 +41,7 @@ class Graphics:
     def draw_nash_point(self, task1):
         nash_graph = plt.gca()
         nash_graph.set_aspect(1)
+
         self.__draw_grid(nash_graph, (-0.2, 1.2, 0.2), (-0.2, 1.2, 0.2),task1.q_sections[0][0],task1.p_sections[0][0])
         self.__draw_axis(nash_graph, (-0.2, 1.2), (-0.2, 1.2))
 
@@ -112,6 +114,34 @@ class Graphics:
         nash_graph.annotate("N", xy=(task1.p_turning_point + self.__annotate_shift[0],
                                      task1.q_turning_point + self.__annotate_shift[1]),
                             fontsize=self.__fontsize)
+
+    def draw_pareto(self, A : list, B : list):
+        windows_size = (9, 9)
+        plt.figure(figsize=windows_size)
+        pareto_graph = plt.gca()
+        max_all_values = max(sum(A,[]) + sum(B,[]))
+        self.__draw_grid(pareto_graph, (-2, max_all_values + 2, 2), (-2, max_all_values + 2, 1),'f1(p,q)','f2(p,q)')
+        self.__draw_axis(pareto_graph, (-2, max_all_values + 2), (-2, max_all_values + 2))
+
+        #Draw points
+        name = 'A'
+        points = []
+        for i in range(2):
+            for j in range(2):
+                point = Point(A[i][j],B[i][j],name)
+                points.append(point)
+                name = chr(ord(name) + 1)
+                pareto_graph.plot(point.x, point.y, 'k.', markersize=self.__dotsize)
+                pareto_graph.annotate(point.name, xy=(point.x + self.__annotate_shift[0],
+                                                      point.y + self.__annotate_shift[1]),
+                                      fontsize=self.__fontsize)
+
+        #Draw lines
+        for i in range(len(points)):
+            self.__draw_line(pareto_graph, (points[0].x, points[0].y), (points[1].x,points[1].y), '-', 2, 'blue')
+            first = points.pop(0)
+            points.append(first)
+
 
 
 
