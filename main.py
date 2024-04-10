@@ -1,4 +1,5 @@
 from task1 import *
+from task2 import *
 from graphics import *
 
 A = [[5,3],
@@ -6,7 +7,6 @@ A = [[5,3],
 
 B = [[5,15],
      [20,5]]
-
 
 def print_matrix(matrix : list):
      for row in matrix:
@@ -27,11 +27,16 @@ if __name__ == '__main__':
      task1 = Task1()
      task1.getNashPoint(A, B)
      graphics1.draw_nash_point(task1)
+     print()
 
      print("2. Построить множество Парето-оптимальных решений")
-     graphics2 = Graphics(30, 12, 20, (-1.3, 0.5))
-     graphics2.draw_pareto(A,B)
+     task2 = Task2(5000, A, B)
+     task2.gen_random_pq_points()
+     graphics2 = Graphics(30, 5, 20, (-0.1, 0.05))
+     graphics2.draw_generated_pq_points(task2.pq_points)
+     task2.get_fpq_points()
+     task2.get_pareto_points()
+     task2.show_pareto()
+     graphics2.draw_pareto(task2.fpq_points)
 
      plt.show()
-
-

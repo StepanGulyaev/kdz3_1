@@ -1,7 +1,6 @@
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-from point import *
 
 matplotlib.use('TkAgg')
 
@@ -12,6 +11,7 @@ class Graphics:
         self.__dotsize = dotsize
         self.__fontsize = fontsize
         self.__annotate_shift = annotate_shift
+
     def __draw_grid(self, graph : plt.gca, major_ticks : tuple , minor_ticks : tuple,
                     x_axis_name : str, y_axis_name : str):
         major_ticks = np.arange(*major_ticks)
@@ -20,6 +20,24 @@ class Graphics:
         graph.set_xticks(minor_ticks, minor=True)
         graph.set_yticks(major_ticks)
         graph.set_yticks(minor_ticks, minor=True)
+        graph.tick_params(axis='both', which='major', labelsize=10)
+        graph.tick_params(axis='both', which='minor', labelsize=10)
+        graph.grid(which='both')
+        plt.xlabel(f'{x_axis_name}')
+        plt.ylabel(f'{y_axis_name}')
+
+    def __draw_assymetrical_grid(self, graph: plt.gca,
+                    x_major_ticks: tuple, x_minor_ticks: tuple,
+                    y_major_ticks: tuple, y_minor_ticks: tuple,
+                    x_axis_name: str, y_axis_name: str):
+        x_major_ticks = np.arange(*x_major_ticks)
+        x_minor_ticks = np.arange(*x_minor_ticks)
+        y_major_ticks = np.arange(*y_major_ticks)
+        y_minor_ticks = np.arange(*y_minor_ticks)
+        graph.set_xticks(x_major_ticks)
+        graph.set_xticks(x_minor_ticks, minor=True)
+        graph.set_yticks(y_major_ticks)
+        graph.set_yticks(y_minor_ticks, minor=True)
         graph.tick_params(axis='both', which='major', labelsize=10)
         graph.tick_params(axis='both', which='minor', labelsize=10)
         graph.grid(which='both')
@@ -42,7 +60,7 @@ class Graphics:
         nash_graph = plt.gca()
         nash_graph.set_aspect(1)
 
-        self.__draw_grid(nash_graph, (-0.2, 1.2, 0.2), (-0.2, 1.2, 0.2),task1.q_sections[0][0],task1.p_sections[0][0])
+        self.__draw_grid(nash_graph, (-0.2, 1.2, 0.2), (-0.2, 1.2, 0.1),task1.q_sections[0][0],task1.p_sections[0][0])
         self.__draw_axis(nash_graph, (-0.2, 1.2), (-0.2, 1.2))
 
         #borders
@@ -115,35 +133,30 @@ class Graphics:
                                      task1.q_turning_point + self.__annotate_shift[1]),
                             fontsize=self.__fontsize)
 
-    def draw_pareto(self, A : list, B : list):
+    def draw_generated_pq_points(self, points : list):
+        windows_size = (10, 10)
+        plt.figure(figsize=windows_size)
+        pq_points_graph = plt.gca()
+
+        self.__draw_grid(pq_points_graph, (0, 1.05, 0.05), (0, 1.05, 0.025), 'p', 'q')
+        self.__draw_axis(pq_points_graph, (0, 1.05), (0, 1.05))
+
+        for point in points:
+            plt.plot(point.x, point.y, 'b.', markersize=self.__dotsize)
+
+
+    def draw_pareto(self, fpq_points : list):
         windows_size = (9, 9)
         plt.figure(figsize=windows_size)
         pareto_graph = plt.gca()
-        max_all_values = max(sum(A,[]) + sum(B,[]))
-        self.__draw_grid(pareto_graph, (-2, max_all_values + 2, 2), (-2, max_all_values + 2, 1),'f1(p,q)','f2(p,q)')
-        self.__draw_axis(pareto_graph, (-2, max_all_values + 2), (-2, max_all_values + 2))
 
-        #Draw points
-        name = 'A'
-        points = []
-        for i in range(2):
-            for j in range(2):
-                point = Point(A[i][j],B[i][j],name)
-                points.append(point)
-                name = chr(ord(name) + 1)
-                pareto_graph.plot(point.x, point.y, 'k.', markersize=self.__dotsize)
-                pareto_graph.annotate(point.name, xy=(point.x + self.__annotate_shift[0],
-                                                      point.y + self.__annotate_shift[1]),
-                                      fontsize=self.__fontsize)
+        max_fpqA = max(list(map(lambda point: point.x, fpq_points)))
+        max_fpqB = max(list(map(lambda point: point.y, fpq_points)))
+        self.__draw_assymetrical_grid(pareto_graph, (0, max_fpqA + 2, 2), (0, max_fpqA + 2, 1),
+                                      (0, max_fpqB + 2, 2), (0, max_fpqB + 2, 1),'fa(p,q)','fb(p,q)')
 
-        #Draw lines
-        for i in range(len(points)):
-            self.__draw_line(pareto_graph, (points[0].x, points[0].y), (points[1].x,points[1].y), '-', 2, 'blue')
-            first = points.pop(0)
-            points.append(first)
-
-
-
-
-
-
+        for point in fpq_points:
+            if point.is_pareto:
+                plt.plot(point.x, point.y, 'r.', markersize=self.__dotsize)
+            else:
+                plt.plot(point.x, point.y, 'b.', markersize=self.__dotsize)

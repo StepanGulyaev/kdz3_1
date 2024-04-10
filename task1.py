@@ -1,6 +1,3 @@
-import matplotlib.pyplot as plt
-
-
 class Task1:
 
     def __init__(self):
@@ -94,14 +91,3 @@ class Task1:
 
         print("Точки равновесия по Нэшу:")
         print(",".join(map(str,self.nash_balance_points)))
-
-
-
-
-
-
-
-
-
-
-
